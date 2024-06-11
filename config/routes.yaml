@@ -3,3 +3,9 @@ controllers:
         path: ../src/Controller/
         namespace: App\Controller
     type: attribute
+
+user_login:
+    path: '/utilisateur/connexion'
+    controller: App\Controller\UtilisateurController::connexionUtilisateur
+    methods: ['POST']
+
