@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module type="WEB_MODULE" version="4">
+  <component name="NewModuleRootManager">
+    <content url="file://$MODULE_DIR$">
+      <sourceFolder url="file://$MODULE_DIR$/back_gest_station/src" isTestSource="false" packagePrefix="App\" />
+      <sourceFolder url="file://$MODULE_DIR$/back_gest_station/tests" isTestSource="true" packagePrefix="App\Tests\" />
+      <sourceFolder url="file://$MODULE_DIR$/spec" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/tests" isTestSource="true" />
+      <excludeFolder url="file://$MODULE_DIR$/back_gest_station/vendor/composer" />
+      <excludeFolder url="file://$MODULE_DIR$/back_gest_station/vendor/doctrine/cache" />
+      <excludeFolder url="file://$MODULE_DIR$/back_gest_station/vendor/doctrine/collections" />
+      <excludeFolder url="file://$MODULE_DIR$/back_gest_station/vendor/doctrine/dbal" />
+      <excludeFolder url="file://$MODULE_DIR$/back_gest_station/vendor/doctrine/deprecations" />
+      <excludeFolder url="file://$MODULE_DIR$/back_gest_station/vendor/doctrine/doctrine-bundle" />
+      <excludeFolder url="file://$MODULE_DIR$/back_gest_station/vendor/doctrine/doctrine-migrations-bundle" />
+      <excludeFolder url="file://$MODULE_DIR$/back_gest_station/vendor/doctrine/event-manager" />
+      <excludeFolder url="file://$MODULE_DIR$/back_gest_station/vendor/doctrine/inflector" />
+      <excludeFolder url="file://$MODULE_DIR$/back_gest_station/vendor/doctrine/instantiator" />
+      <excludeFolder url="file://$MODULE_DIR$/back_gest_station/vendor/doctrine/lexer" />
+      <excludeFolder url="file://$MODULE_DIR$/back_gest_station/vendor/doctrine/migrations" />
+      <excludeFolder url="file://$MODULE_DIR$/back_gest_station/vendor/doctrine/orm" />
+      <excludeFolder url="file://$MODULE_DIR$/back_gest_station/vendor/doctrine/persistence" />
+      <excludeFolder url="file://$MODULE_DIR$/back_gest_station/vendor/doctrine/sql-formatter" />
+      <excludeFolder url="file://$MODULE_DIR$/back_gest_station/vendor/nikic/php-parser" />
+      <excludeFolder url="file://$MODULE_DIR$/back_gest_station/vendor/psr/cache" />
+      <excludeFolder url="file://$MODULE_DIR$/back_gest_station/vendor/psr/container" />
+      <excludeFolder url="file://$MODULE_DIR$/back_gest_station/vendor/psr/event-dispatcher" />
+      <excludeFolder url="file://$MODULE_DIR$/back_gest_station/vendor/psr/log" />
+      <excludeFolder url="file://$MODULE_DIR$/back_gest_station/vendor/symfony/cache" />
+      <excludeFolder url="file://$MODULE_DIR$/back_gest_station/vendor/symfony/cache-contracts" />
+      <excludeFolder url="file://$MODULE_DIR$/back_gest_station/vendor/symfony/config" />
+      <excludeFolder url="file://$MODULE_DIR$/back_gest_station/vendor/symfony/console" />
+      <excludeFolder url="file://$MODULE_DIR$/back_gest_station/vendor/symfony/dependency-injection" />
+      <excludeFolder url="file://$MODULE_DIR$/back_gest_station/vendor/symfony/deprecation-contracts" />
+      <excludeFolder url="file://$MODULE_DIR$/back_gest_station/vendor/symfony/doctrine-bridge" />
+      <excludeFolder url="file://$MODULE_DIR$/back_gest_station/vendor/symfony/dotenv" />
+      <excludeFolder url="file://$MODULE_DIR$/back_gest_station/vendor/symfony/error-handler" />
+      <excludeFolder url="file://$MODULE_DIR$/back_gest_station/vendor/symfony/event-dispatcher" />
+      <excludeFolder url="file://$MODULE_DIR$/back_gest_station/vendor/symfony/event-dispatcher-contracts" />
+      <excludeFolder url="file://$MODULE_DIR$/back_gest_station/vendor/symfony/filesystem" />
+      <excludeFolder url="file://$MODULE_DIR$/back_gest_station/vendor/symfony/finder" />
+      <excludeFolder url="file://$MODULE_DIR$/back_gest_station/vendor/symfony/flex" />
+      <excludeFolder url="file://$MODULE_DIR$/back_gest_station/vendor/symfony/framework-bundle" />
+      <excludeFolder url="file://$MODULE_DIR$/back_gest_station/vendor/symfony/http-foundation" />
+      <excludeFolder url="file://$MODULE_DIR$/back_gest_station/vendor/symfony/http-kernel" />
+      <excludeFolder url="file://$MODULE_DIR$/back_gest_station/vendor/symfony/maker-bundle" />
+      <excludeFolder url="file://$MODULE_DIR$/back_gest_station/vendor/symfony/polyfill-intl-grapheme" />
+      <excludeFolder url="file://$MODULE_DIR$/back_gest_station/vendor/symfony/polyfill-intl-normalizer" />
+      <excludeFolder url="file://$MODULE_DIR$/back_gest_station/vendor/symfony/polyfill-mbstring" />
+      <excludeFolder url="file://$MODULE_DIR$/back_gest_station/vendor/symfony/polyfill-php83" />
+      <excludeFolder url="file://$MODULE_DIR$/back_gest_station/vendor/symfony/process" />
+      <excludeFolder url="file://$MODULE_DIR$/back_gest_station/vendor/symfony/routing" />
+      <excludeFolder url="file://$MODULE_DIR$/back_gest_station/vendor/symfony/runtime" />
+      <excludeFolder url="file://$MODULE_DIR$/back_gest_station/vendor/symfony/service-contracts" />
+      <excludeFolder url="file://$MODULE_DIR$/back_gest_station/vendor/symfony/stopwatch" />
+      <excludeFolder url="file://$MODULE_DIR$/back_gest_station/vendor/symfony/string" />
+      <excludeFolder url="file://$MODULE_DIR$/back_gest_station/vendor/symfony/var-dumper" />
+      <excludeFolder url="file://$MODULE_DIR$/back_gest_station/vendor/symfony/var-exporter" />
+      <excludeFolder url="file://$MODULE_DIR$/back_gest_station/vendor/symfony/yaml" />
+      <excludeFolder url="file://$MODULE_DIR$/vendor/composer" />
+      <excludeFolder url="file://$MODULE_DIR$/back_gest_station/vendor/egulias/email-validator" />
+      <excludeFolder url="file://$MODULE_DIR$/back_gest_station/vendor/psr/clock" />
+      <excludeFolder url="file://$MODULE_DIR$/back_gest_station/vendor/symfony/clock" />
+      <excludeFolder url="file://$MODULE_DIR$/back_gest_station/vendor/symfony/mailer" />
+      <excludeFolder url="file://$MODULE_DIR$/back_gest_station/vendor/symfony/mime" />
+      <excludeFolder url="file://$MODULE_DIR$/back_gest_station/vendor/symfony/password-hasher" />
+      <excludeFolder url="file://$MODULE_DIR$/back_gest_station/vendor/symfony/polyfill-intl-idn" />
+      <excludeFolder url="file://$MODULE_DIR$/back_gest_station/vendor/symfony/property-access" />
+      <excludeFolder url="file://$MODULE_DIR$/back_gest_station/vendor/symfony/property-info" />
+      <excludeFolder url="file://$MODULE_DIR$/back_gest_station/vendor/symfony/security-bundle" />
+      <excludeFolder url="file://$MODULE_DIR$/back_gest_station/vendor/symfony/security-core" />
+      <excludeFolder url="file://$MODULE_DIR$/back_gest_station/vendor/symfony/security-csrf" />
+      <excludeFolder url="file://$MODULE_DIR$/back_gest_station/vendor/symfony/security-http" />
+      <excludeFolder url="file://$MODULE_DIR$/back_gest_station/vendor/symfony/type-info" />
+    </content>
+    <orderEntry type="inheritedJdk" />
+    <orderEntry type="sourceFolder" forTests="false" />
+  </component>
+</module>
