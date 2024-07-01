@@ -6,6 +6,7 @@ use App\Repository\UtilisateurRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: UtilisateurRepository::class)]
 class Utilisateur
@@ -15,10 +16,12 @@ class Utilisateur
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\Column(length: 255)]
+    #[ORM\Column(length: 255, nullable: false)]
+    #[Assert\NotBlank(message: "Le champ 'nom' ne doit pas être vide.")]
     private ?string $nomUtilisateur = null;
 
-    #[ORM\Column(length: 255)]
+    #[ORM\Column(length: 255, nullable: false)]
+    #[Assert\NotBlank(message: "Le champ 'prénom' ne doit pas être vide.")]
     private ?string $prenomUtilisateur = null;
 
     #[ORM\Column(length: 180)]
@@ -27,26 +30,25 @@ class Utilisateur
     #[ORM\Column(length: 14)]
     private ?string $motDePasse = null;
 
-
     /**
      * @var Collection<int, DevisStation>
      */
-    #[ORM\OneToMany(targetEntity: DevisStation::class, mappedBy: 'devisStation')]
+    #[ORM\OneToMany(targetEntity: DevisStation::class, mappedBy: 'utilisateur')]
     private Collection $devisStations;
+
+    /**
+     * @var Collection<int, DevisStationGasoil>
+     */
+    #[ORM\OneToMany(targetEntity: DevisStationGasoil::class, mappedBy: 'utilisateur')]
+    private Collection $devisStationsGasoil;
 
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $photoUrl = null;
-
-
-
-
-
 
     public function __construct()
     {
         $this->devisStations = new ArrayCollection();
     }
-
 
     public function getId(): ?int
     {
@@ -113,7 +115,7 @@ class Utilisateur
     {
         if (!$this->devisStations->contains($devisStation)) {
             $this->devisStations->add($devisStation);
-            $devisStation->setDevisStation($this);
+            $devisStation->setUtilisateur($this);
         }
 
         return $this;
@@ -123,8 +125,8 @@ class Utilisateur
     {
         if ($this->devisStations->removeElement($devisStation)) {
             // set the owning side to null (unless already changed)
-            if ($devisStation->getDevisStation() === $this) {
-                $devisStation->setDevisStation(null);
+            if ($devisStation->getUtilisateur() === $this) {
+                $devisStation->setUtilisateur(null);
             }
         }
 
@@ -143,6 +145,35 @@ class Utilisateur
         return $this;
     }
 
+    /**
+     * @return Collection<int, DevisStation>
+     */
+    public function getDevisStationsGasoil(): Collection
+    {
+        return $this->devisStationsGasoil;
+    }
+
+    public function addDevisStationGasoil(DevisStationGasoil $devisStationGasoil): static
+    {
+        if (!$this->devisStationsGasoil->contains($devisStationGasoil)) {
+            $this->devisStationsGasoil->add($devisStationGasoil);
+            $devisStationGasoil->setUtilisateur($this);
+        }
+
+        return $this;
+    }
+
+    public function removeDevisStationGasoil(DevisStationGasoil $devisStationGasoil): static
+    {
+        if ($this->devisStationsGasoil->removeElement($devisStationGasoil)) {
+            // set the owning side to null (unless already changed)
+            if ($devisStationGasoil->getUtilisateur() === $this) {
+                $devisStationGasoil->setUtilisateur(null);
+            }
+        }
+
+        return $this;
+    }
 
 
 }

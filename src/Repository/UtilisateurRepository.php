@@ -26,7 +26,7 @@ class UtilisateurRepository extends ServiceEntityRepository
             ->getOneOrNullResult();
     }*/
 
-    public function findByEmailUtilisateurAndMotDePasse(string $email, string $motDePasse): ?Utilisateur
+    public function findByEmailUtilisateurAndMotDePasse($email, $motDePasse)
     {
         return $this->createQueryBuilder('u')
             ->andWhere('u.emailUtilisateur = :email')

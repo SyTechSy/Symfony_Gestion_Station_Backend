@@ -2,12 +2,12 @@
 
 namespace App\Entity;
 
-use App\Repository\DevisStationRepository;
+use App\Repository\DevisStationGasoilRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
-#[ORM\Entity(repositoryClass: DevisStationRepository::class)]
-class DevisStation
+#[ORM\Entity(repositoryClass: DevisStationGasoilRepository::class)]
+class DevisStationGasoil
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
@@ -32,7 +32,7 @@ class DevisStation
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
     private ?\DateTimeInterface $dateAddDevis = null;
 
-    #[ORM\ManyToOne(targetEntity: Utilisateur::class, inversedBy: 'devisStations')]
+    #[ORM\ManyToOne(targetEntity: Utilisateur::class, inversedBy: 'devisStationsGasoil')]
     private ?Utilisateur $utilisateur = null;
 
     public function getId(): ?int

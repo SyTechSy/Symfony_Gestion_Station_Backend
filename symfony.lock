@@ -115,5 +115,11 @@
             "./config/packages/security.yaml",
             "./config/routes/security.yaml"
         ]
+    },
+    "symfony/validator": {
+        "version": "7.1",
+        "recipe": {
+            "version": "7.0"
+        }
     }
 }

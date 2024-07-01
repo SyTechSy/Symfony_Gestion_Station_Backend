@@ -14,14 +14,16 @@ use Symfony\Component\Filesystem\Exception\IOExceptionInterface;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 class UtilisateurController extends AbstractController
 {
 
     private EntityManagerInterface $entityManager;
     private ServicePhoto $photoService;
-    private $params;
+    //private $params;
     private UtilisateurRepository $utilisateurRepository;
 
 
@@ -35,9 +37,41 @@ class UtilisateurController extends AbstractController
     /**
      * @throws RandomException
      */
-    #[Route('/utilisateur/ajouter', name: 'user_register', methods: ['POST'])]
+
+
+    // CONNEXION D'UN UTILISATEUR
+    //#[Route('/login/user', name: 'user_login', methods: ['POST'])]
+    #[Route('/login/user', name: 'login_user', methods: ['POST'])]
+    public function loginUser(Request $request): JsonResponse
+    {
+        $userData = json_decode($request->getContent(), true);
+        //$this->logger->info('Données de la requête : ' . print_r($userData, true));
+
+        if (!isset($userData['emailUtilisateur']) || !isset($userData['motDePasse'])) {
+            return new JsonResponse(['message' => 'Paramètres manquants'], 400);
+        }
+
+        $emailUtilisateur = $userData['emailUtilisateur'];
+        $motDePasse = $userData['motDePasse'];
+
+        $utilisateur = $this->utilisateurRepository->findByEmailUtilisateurAndMotDePasse($emailUtilisateur, $motDePasse);
+
+        if (!$utilisateur) {
+            return new JsonResponse(['message' => 'Email ou mot de passe incorrect'], 401);
+        }
+
+        // Generate a token or session here, depending on your authentication strategy
+        return new JsonResponse(['message' => 'Connexion réussie', 'utilisateur' => [
+            'id' => $utilisateur->getId(),
+            'nomUtilisateur' => $utilisateur->getNomUtilisateur(),
+            'prenomUtilisateur' => $utilisateur->getPrenomUtilisateur(),
+            'emailUtilisateur' => $utilisateur->getEmailUtilisateur(),
+            'motDePasse' => $utilisateur->getMotDePasse()
+        ]], 200);
+    }
     // AJOUTER UN UTILISATEUR
-    public function ajouterUtilisateur(Request $request): JsonResponse
+    #[Route('/add/user', name: 'user_register', methods: ['POST'])]
+    public function addUser(Request $request, ValidatorInterface $validator): Response
     {
         $userData = json_decode($request->getContent(), true);
         $nomUtilisateur = $userData['nomUtilisateur'];
@@ -50,6 +84,13 @@ class UtilisateurController extends AbstractController
         $utilisateur->setPrenomUtilisateur($prenomUtilisateur);
         $utilisateur->setEmailUtilisateur($emailUtilisateur);
         $utilisateur->setMotDePasse($motDePasse);
+
+        $errors = $validator->validate($utilisateur);
+
+        if (count($errors) > 0) {
+            $errorsString = (string) $errors;
+            return new Response($errorsString, Response::HTTP_BAD_REQUEST);
+        }
 
         $this->entityManager->persist($utilisateur);
         $this->entityManager->flush();
@@ -87,8 +128,8 @@ class UtilisateurController extends AbstractController
 
     }
     // MODIFIER UN UTILISATEUR
-    #[Route('/utilisateur/modifier/{id}', name: 'user_update', methods: ['PUT'])]
-    public function modifierUtilisateur(int $id, Request $request): JsonResponse
+    #[Route('/edit/user/{id}', name: 'user_update', methods: ['PUT'])]
+    public function editUser(int $id, Request $request): JsonResponse
     {
         $userData = json_decode($request->getContent(), true);
         $utilisateur = $this->entityManager->getRepository(Utilisateur::class)->find($id);
@@ -115,8 +156,8 @@ class UtilisateurController extends AbstractController
         return new JsonResponse(['message' => 'Utilisateur modifié avec succès'], 200);
     }
     // LISTES DES UTILISATEURS
-    #[Route('/utilisateur/list', name: 'user_list', methods: ['GET'])]
-    public function listerUtilisateurs(): JsonResponse
+    #[Route('/list/users', name: 'user_list', methods: ['GET'])]
+    public function listUsers(): JsonResponse
     {
         $utilisateurs = $this->entityManager->getRepository(Utilisateur::class)->findAll();
         $data = [];
@@ -127,14 +168,15 @@ class UtilisateurController extends AbstractController
                 'nomUtilisateur' => $utilisateur->getNomUtilisateur(),
                 'prenomUtilisateur' => $utilisateur->getPrenomUtilisateur(),
                 'emailUtilisateur' => $utilisateur->getEmailUtilisateur(),
+                'motDePasse' => $utilisateur->getMotDePasse()
             ];
         }
 
         return new JsonResponse($data, 200);
-    }
+    }   
     // SUPPRESSION UTILISATEUR
-    #[Route('/utilisateur/supprimer/{id}', name: 'user_delete', methods: ['DELETE'])]
-    public function supprimerUtilisateur(int $id): JsonResponse
+    #[Route('/delete/user/{id}', name: 'user_delete', methods: ['DELETE'])]
+    public function deleteUser(int $id): JsonResponse
     {
         $utilisateur = $this->entityManager->getRepository(Utilisateur::class)->find($id);
 
@@ -148,8 +190,8 @@ class UtilisateurController extends AbstractController
         return new JsonResponse(['message' => 'Utilisateur supprimé avec succès'], 200);
     }
     // DETAIL DE L'UTILISATEUR
-    #[Route('/utilisateur/detail/{id}', name: 'user_detail', methods: ['GET'])]
-    public function detailsUtilisateur(int $id): JsonResponse
+    #[Route('/profil/user/{id}', name: 'profil_user', methods: ['GET'])]
+    public function detailUser(int $id): JsonResponse
     {
         $utilisateur = $this->entityManager->getRepository(Utilisateur::class)->find($id);
 
@@ -162,42 +204,14 @@ class UtilisateurController extends AbstractController
             'nomUtilisateur' => $utilisateur->getNomUtilisateur(),
             'prenomUtilisateur' => $utilisateur->getPrenomUtilisateur(),
             'emailUtilisateur' => $utilisateur->getEmailUtilisateur(),
+            'motDePasse' => $utilisateur->getMotDePasse()
         ];
 
         return new JsonResponse($data, 200);
     }
-    // CONNEXION D'UN UTILISATEUR
-    #[Route('/utilisateur/connexion', name: 'user_login', methods: ['POST'])]
-    public function connexionUtilisateur(Request $request): JsonResponse
-    {
-        $userData = json_decode($request->getContent(), true);
-        //$this->logger->info('Données de la requête : ' . print_r($userData, true));
-
-        if (!isset($userData['emailUtilisateur']) || !isset($userData['motDePasse'])) {
-            return new JsonResponse(['message' => 'Paramètres manquants'], 400);
-        }
-
-        $emailUtilisateur = $userData['emailUtilisateur'];
-        $motDePasse = $userData['motDePasse'];
-
-        $utilisateur = $this->utilisateurRepository->findByEmailUtilisateurAndMotDePasse($emailUtilisateur, $motDePasse);
-
-        if (!$utilisateur) {
-            return new JsonResponse(['message' => 'Email ou mot de passe incorrect'], 401);
-        }
-
-        // Generate a token or session here, depending on your authentication strategy
-        return new JsonResponse(['message' => 'Connexion réussie', 'utilisateur' => [
-            'id' => $utilisateur->getId(),
-            'nomUtilisateur' => $utilisateur->getNomUtilisateur(),
-            'prenomUtilisateur' => $utilisateur->getPrenomUtilisateur(),
-            'emailUtilisateur' => $utilisateur->getEmailUtilisateur(),
-            'motDePasse' => $utilisateur->getMotDePasse()
-        ]], 200);
-    }
     // AJOUTER PHOTO DE PROFIL
-    #[Route('/utilisateur/{id}/ajouter-profil', name: 'user_add_photo', methods: ['POST'])]
-    public function ajouterPhoto(int $id, Request $request): JsonResponse
+    #[Route('/add/profil/user/{id}', name: 'user_add_photo', methods: ['POST'])]
+    public function addPhoto(int $id, Request $request): JsonResponse
     {
         $utilisateur = $this->entityManager->getRepository(Utilisateur::class)->find($id);
         if (!$utilisateur) {
@@ -219,8 +233,8 @@ class UtilisateurController extends AbstractController
         return new JsonResponse(['error' => 'Le fichier photo ajouter est requis', 'received_files' => $allFiles], 400);
     }
     // MODIFIER PHOTO DE PROFIL
-    #[Route('/utilisateur/{id}/modifier-profil', name: 'user_modify_photo', methods: ['POST'])]
-    public function modifierPhoto(int $id, Request $request): JsonResponse
+    #[Route('/edit/profil/user/{id}', name: 'user_modify_photo', methods: ['POST'])]
+    public function editPhoto(int $id, Request $request): JsonResponse
     {
         $utilisateur = $this->entityManager->getRepository(Utilisateur::class)->find($id);
         if (!$utilisateur) {
@@ -244,8 +258,8 @@ class UtilisateurController extends AbstractController
     }
 
     // SUPPRIMER PHOTO DE PROFIL
-    #[Route('/utilisateur/{id}/supprimer-profil', name: 'user_delete_photo', methods: ['DELETE'])]
-    public function supprimerPhoto(int $id): JsonResponse
+    #[Route('/delete/profil/user/{id}', name: 'user_delete_photo', methods: ['DELETE'])]
+    public function deletePhoto(int $id): JsonResponse
     {
         $utilisateur = $this->entityManager->getRepository(Utilisateur::class)->find($id);
         if (!$utilisateur) {
