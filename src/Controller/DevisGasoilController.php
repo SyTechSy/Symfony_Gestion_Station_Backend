@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Entity\DevisStationGasoil;
 use App\Entity\Utilisateur;
+use App\Repository\DevisStationGasoilRepository;
 use App\Repository\UtilisateurRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -126,33 +127,74 @@ class DevisGasoilController extends AbstractController
         return new JsonResponse($dataDeviss, 200);
     }
 
-
-    /*#[Route('/list/devis', name: 'list_devis', methods: ['GET'])]
-    public  function listDevis(): JsonResponse
+    //SUPPRESSION UN DEVIS Gasoil
+    #[Route('/delete/devisGasoil/{id}', name: 'devisGasoil_delete', methods: ['DELETE'])]
+    public function deleteDevisGasoil(int $id): JsonResponse
     {
-        $devisStations = $this->entityManager->getRepository(DevisStation::class)->findAll();
-        $dataDevis = [];
+        $devisStationGasoil = $this->entityManager->getRepository(DevisStationGasoil::class)->find($id);
 
-        foreach($devisStations as $devisStation) {
-            $utilisateur = $devisStation->getUtilisateur();
-            $dataDevis[] = [
-                'idDevis' => $devisStation->getId(),
-                'valeurArriver' => $devisStation->getValeurArriver(),
-                'valeurDeDepart' => $devisStation->getValeurDeDepart(),
-                'consommation' => $devisStation->getConsommation(),
-                'prixUnite' => $devisStation->getPrixUnite(),
-                'budgetObtenu' => $devisStation->getBudgetObtenu(),
-                'dateAddDevis' => $devisStation->getDateAddDevis(),
-                'utilisateur' => [
-                    'id' => $utilisateur->getId(),
-                    'nomUtilisateur' => $utilisateur->getNomUtilisateur(),
-                    'prenomUtilisateur' => $utilisateur->getPrenomUtilisateur(),
-                    'emailUtilisateur' => $utilisateur->getEmailUtilisateur(),
-                    'motDePasse' => $utilisateur->getMotDePasse(),
-                    'photoUrl' => $utilisateur->getPhotoUrl(),
-                ]
-            ];
+        if (!$devisStationGasoil) {
+            return new JsonResponse(['message' => 'Devis gasoil non trouvé'], 404);
         }
-        return new JsonResponse($dataDevis, 200);
-    }*/
+
+        $this->entityManager->remove($devisStationGasoil);
+        $this->entityManager->flush();
+
+        return new JsonResponse(['message' => 'Devis gasoil supprimé avec succès'], 200);
+    }
+
+    // MODIFICATION DEVIS GASOIL
+    #[Route('/edit/devisGasoil/{id}', name: 'devisGasoil_update', methods: ['PUT'])]
+    public function updateDevisGasoil(
+        int $id,
+        Request $request,
+        EntityManagerInterface $entityManager,
+        DevisStationGasoilRepository $devisStationGasoilRepository): JsonResponse
+    {
+        $dataGasoil = json_decode($request->getContent(), true);
+        error_log(print_r($dataGasoil, true));
+
+        // Trouve le devis gasoil par ID
+        $devisStation = $devisStationGasoilRepository->find($id);
+        if (!$devisStation) {
+            return $this->json(['error' => 'Devis gasoil non trouvé'], Response::HTTP_NOT_FOUND);
+        }
+
+        $valeurArriver = $dataGasoil['valeurArriver'];
+        $valeurDeDepart = $dataGasoil['valeurDeDepart'];
+        $prixUnite = $dataGasoil['prixUnite'];
+
+        // Recalcule la consommation et le budget
+        $consommation = $valeurArriver - $valeurDeDepart;
+        $budgetObtenu = $consommation * $prixUnite;
+
+        // Met à jour les champs du devis gasoil
+        $devisStation->setValeurArriver($valeurArriver);
+        $devisStation->setValeurDeDepart($valeurDeDepart);
+        $devisStation->setPrixUnite($prixUnite);
+        $devisStation->setConsommation($consommation);
+        $devisStation->setBudgetObtenu($budgetObtenu);
+        $devisStation->setDateAddDevis(new \DateTime());
+
+        $entityManager->persist($devisStation);
+        $entityManager->flush();
+
+        return new JsonResponse([
+            'idDevis' => $devisStation->getId(),
+            'valeurArriver' => $devisStation->getValeurArriver(),
+            'valeurDeDepart' => $devisStation->getValeurDeDepart(),
+            'consommation' => $devisStation->getConsommation(),
+            'prixUnite' => $devisStation->getPrixUnite(),
+            'budgetObtenu' => $devisStation->getBudgetObtenu(),
+            'dateAddDevis' => $devisStation->getDateAddDevis()->format('Y-m-d H:i:s'),
+            'utilisateur' => [
+                'id' => $devisStation->getUtilisateur()->getId(),
+                'nomUtilisateur' => $devisStation->getUtilisateur()->getNomUtilisateur(),
+                'prenomUtilisateur' => $devisStation->getUtilisateur()->getPrenomUtilisateur(),
+                'emailUtilisateur' => $devisStation->getUtilisateur()->getEmailUtilisateur(),
+                'motDePasse' => $devisStation->getUtilisateur()->getMotDePasse(),
+                'photoUrl' => $devisStation->getUtilisateur()->getPhotoUrl(),
+            ]
+        ], Response::HTTP_OK);
+    }
 }

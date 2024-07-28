@@ -45,9 +45,16 @@ class Utilisateur
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $photoUrl = null;
 
+    /**
+     * @var Collection<int, Bons>
+     */
+    #[ORM\OneToMany(targetEntity: Bons::class, mappedBy: 'utilisateur')]
+    private Collection $bons;
+
     public function __construct()
     {
         $this->devisStations = new ArrayCollection();
+        $this->bons = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -169,6 +176,36 @@ class Utilisateur
             // set the owning side to null (unless already changed)
             if ($devisStationGasoil->getUtilisateur() === $this) {
                 $devisStationGasoil->setUtilisateur(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Bons>
+     */
+    public function getBons(): Collection
+    {
+        return $this->bons;
+    }
+
+    public function addBon(Bons $bon): static
+    {
+        if (!$this->bons->contains($bon)) {
+            $this->bons->add($bon);
+            $bon->setUtilisateur($this);
+        }
+
+        return $this;
+    }
+
+    public function removeBon(Bons $bon): static
+    {
+        if ($this->bons->removeElement($bon)) {
+            // set the owning side to null (unless already changed)
+            if ($bon->getUtilisateur() === $this) {
+                $bon->setUtilisateur(null);
             }
         }
 

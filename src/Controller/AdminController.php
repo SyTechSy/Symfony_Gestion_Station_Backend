@@ -8,6 +8,8 @@ use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\Mailer\MailerInterface;
+use Symfony\Component\Mime\Email;
 use Symfony\Component\Routing\Attribute\Route;
 
 class AdminController extends AbstractController
@@ -47,7 +49,7 @@ class AdminController extends AbstractController
         );
     }
     // CONNEXION ADMINISTRATEUR
-    #[Route('/login/admin', name: 'admin_login', methods: ['POST'])]
+    /*#[Route('/login/admin', name: 'admin_login', methods: ['POST'])]
     public function loginAdmin(Request $request): JsonResponse
     {
         $adminData = json_decode($request->getContent(), true);
@@ -76,6 +78,93 @@ class AdminController extends AbstractController
                 'motDePasse' => $admin->getMotDePasse()
             ]
         ], 200);
+    }*/
+    #[Route('/login/admin', name: 'admin_login', methods: ['POST'])]
+    public function loginAdmin(Request $request, MailerInterface $mailer): JsonResponse
+    {
+        $adminData = json_decode($request->getContent(), true);
+
+        if (!isset($adminData['emailAdmin']) || !isset($adminData['motDePasse'])) {
+            return new JsonResponse(['message' => 'Paramètres manquants'], 400);
+        }
+
+        $emailAdmin = $adminData['emailAdmin'];
+        $motDePasse = $adminData['motDePasse'];
+
+        $admin = $this->adminRepository->findByEmailAdminAndMotDePasse($emailAdmin, $motDePasse);
+
+        if (!$admin) {
+            return new JsonResponse(['message' => 'Email ou mot de passe incorrect'], 401);
+        }
+
+        // Générer le code de vérification
+        $verificationCode = $this->generateVerificationCode();
+        $expirationTime = new \DateTime('+10 minutes');
+
+        // Envoyer le code par email
+        $this->sendVerificationEmail($emailAdmin, $verificationCode, $mailer);
+
+        // Stocker le code et son expiration dans la base de données
+        $admin->setVerificationCode($verificationCode);
+        $admin->setVerificationCodeExpiration($expirationTime);
+        $this->entityManager->flush();
+
+        return new JsonResponse([
+            'message' => 'Code de vérification envoyé. Veuillez vérifier votre email.',
+            'admin' => [
+                'id' => $admin->getId(),
+                'nomAdmin' => $admin->getNomAdmin(),
+                'prenomAdmin' => $admin->getPrenomAdmin(),
+                'emailAdmin' => $admin->getEmailAdmin(),
+                // Ne pas inclure le mot de passe dans la réponse
+            ]
+        ], 200);
+    }
+
+    #[Route('/verify/admin', name: 'admin_verify', methods: ['POST'])]
+    public function verifyAdmin(Request $request): JsonResponse
+    {
+        $verificationData = json_decode($request->getContent(), true);
+
+        if (!isset($verificationData['emailAdmin']) || !isset($verificationData['code'])) {
+            return new JsonResponse(['message' => 'Paramètres manquants'], 400);
+        }
+
+        $emailAdmin = $verificationData['emailAdmin'];
+        $code = $verificationData['code'];
+
+        // Récupérer l'admin par email
+        $admin = $this->adminRepository->findOneBy(['emailAdmin' => $emailAdmin]);
+
+        if (!$admin) {
+            return new JsonResponse(['message' => 'Admin non trouvé'], 404);
+        }
+
+        if ($admin->getVerificationCodeExpiration() < new \DateTime()) {
+            return new JsonResponse(['message' => 'Code de vérification expiré'], 401);
+        }
+
+        if ($admin->getVerificationCode() === $code) {
+            // Code correct, connexion réussie
+            return new JsonResponse(['message' => 'Vérification réussie'], 200);
+        } else {
+            // Code incorrect
+            return new JsonResponse(['message' => 'Code de vérification incorrect'], 401);
+        }
+    }
+
+    private function generateVerificationCode() {
+        return rand(10000, 99999); // Génère un code aléatoire à 5 chiffres
+    }
+
+    public function sendVerificationEmail($email, $code, MailerInterface $mailer) {
+        $emailMessage = (new Email())
+            ->from('sydiakaridia38@gmail.com')
+            ->to($email)
+            ->subject('Votre code de vérification')
+            ->text("Votre code de vérification est : $code");
+
+        $mailer->send($emailMessage);
     }
 
     // MODIFICATION DE L'ADMINISTRATEUR

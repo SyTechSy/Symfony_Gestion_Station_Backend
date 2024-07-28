@@ -15,6 +15,7 @@ use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 
@@ -26,12 +27,15 @@ class UtilisateurController extends AbstractController
     //private $params;
     private UtilisateurRepository $utilisateurRepository;
 
+    private $passwordEncoder;
 
-    public function __construct(EntityManagerInterface $entityManager, ServicePhoto $photoService, UtilisateurRepository $utilisateurRepository)
+
+    public function __construct(EntityManagerInterface $entityManager, ServicePhoto $photoService, UtilisateurRepository $utilisateurRepository, UserPasswordHasherInterface $passwordEncoder)
     {
         $this->entityManager = $entityManager;
         $this->photoService = $photoService;
         $this->utilisateurRepository = $utilisateurRepository;
+        $this->passwordEncoder = $passwordEncoder;
     }
 
     /**
@@ -181,13 +185,13 @@ class UtilisateurController extends AbstractController
         $utilisateur = $this->entityManager->getRepository(Utilisateur::class)->find($id);
 
         if (!$utilisateur) {
-            return new JsonResponse(['message' => 'Utilisateur non trouvé'], 404);
+            return new JsonResponse(['message' => 'Utilisateurs non trouvé'], 404);
         }
 
         $this->entityManager->remove($utilisateur);
         $this->entityManager->flush();
 
-        return new JsonResponse(['message' => 'Utilisateur supprimé avec succès'], 200);
+        return new JsonResponse(['message' => 'Utilisateurs supprimé avec succès'], 200);
     }
     // DETAIL DE L'UTILISATEUR
     #[Route('/profil/user/{id}', name: 'profil_user', methods: ['GET'])]
@@ -282,6 +286,42 @@ class UtilisateurController extends AbstractController
         return new JsonResponse(['error' => 'Aucune photo de profil à supprimer'], 400);
     }
 
+    #[Route('/change_password', name: 'changer_password_user', methods: ['POST'])]
+    public function changePassword(Request $request): JsonResponse
+    {
+        $userData = json_decode($request->getContent(), true);
+
+        // Check if the user is authenticated
+        $utilisateur = $this->getUser();
+        if (!$utilisateur) {
+            return new JsonResponse(['message' => 'User not authenticated'], 401);
+        }
+
+        // Validate the request data
+        if (!isset($userData['currentPassword']) || !isset($userData['newPassword']) || !isset($userData['confirmPassword'])) {
+            return new JsonResponse(['message' => 'Paramètres manquants'], 400);
+        }
+
+        $currentPassword = $userData['currentPassword'];
+        $newPassword = $userData['newPassword'];
+        $confirmPassword = $userData['confirmPassword'];
+
+        // Check if the new password matches the confirmation
+        if ($newPassword !== $confirmPassword) {
+            return new JsonResponse(['message' => 'New password and confirmation do not match'], 400);
+        }
+
+        // Verify the current password
+        if (!$this->passwordEncoder->isPasswordValid($utilisateur, $currentPassword)) {
+            return new JsonResponse(['message' => 'Current password is incorrect'], 401);
+        }
+
+        // Encode and set the new password
+        $utilisateur->setPassword($this->passwordEncoder->encodePassword($utilisateur, $newPassword));
+        $this->utilisateurRepository->save($utilisateur);
+
+        return new JsonResponse(['message' => 'Password changed successfully'], 200);
+    }
 
 
 }

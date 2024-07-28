@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Entity\DevisStation;
 use App\Entity\Utilisateur;
+use App\Repository\DevisStationRepository;
 use App\Repository\UtilisateurRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
@@ -128,8 +129,81 @@ class DevisController extends AbstractController
         return new JsonResponse($dataDevis, 200);
     }
 
+    // SUPPRESSION UN DEVIS Essense
+    #[Route('/delete/devis/{id}', name: 'devis_delete', methods: ['DELETE'])]
+    public function deleteDevisEssence(int $id): JsonResponse
+    {
+        $devisStation = $this->entityManager->getRepository(DevisStation::class)->find($id);
 
-    /*#[Route('/list/devis', name: 'list_devis', methods: ['GET'])]
+        if (!$devisStation) {
+            return new JsonResponse(['message' => 'Devis non trouvé'], 404);
+        }
+
+        $this->entityManager->remove($devisStation);
+        $this->entityManager->flush();
+
+        return new JsonResponse(['message' => 'Devis supprimé avec succès'], 200);
+    }
+
+    // MODIFICATION DE DEVIS ESSENCE
+    #[Route('/edit/devisEssence/{id}', name: 'devisEssence_update', methods: ['PUT'])]
+    public function updateDevis(
+        int $id,
+        Request $request,
+        EntityManagerInterface $entityManager,
+        DevisStationRepository $devisStationRepository): JsonResponse
+    {
+        $dataEssence = json_decode($request->getContent(), true);
+        error_log(print_r($dataEssence, true));
+
+        // Trouve le  essence par ID
+        $devisStation = $devisStationRepository->find($id);
+        if (!$devisStation) {
+            return $this->json(['error' => 'Devis essence non trouvé'], Response::HTTP_NOT_FOUND);
+        }
+
+        $valeurArriver = $dataEssence['valeurArriver'];
+        $valeurDeDepart = $dataEssence['valeurDeDepart'];
+        $prixUnite = $dataEssence['prixUnite'];
+
+        // Recalcule la consommation et le budget
+        $consommation = $valeurArriver - $valeurDeDepart;
+        $budgetObtenu = $consommation * $prixUnite;
+
+        // Met à jour les champs du devis essence
+        $devisStation->setValeurArriver($valeurArriver);
+        $devisStation->setValeurDeDepart($valeurDeDepart);
+        $devisStation->setPrixUnite($prixUnite);
+        $devisStation->setConsommation($consommation);
+        $devisStation->setBudgetObtenu($budgetObtenu);
+        $devisStation->setDateAddDevis(new \DateTime());
+
+        $entityManager->persist($devisStation);
+        $entityManager->flush();
+
+        return new JsonResponse([
+            'idDevis' => $devisStation->getId(),
+            'valeurArriver' => $devisStation->getValeurArriver(),
+            'valeurDeDepart' => $devisStation->getValeurDeDepart(),
+            'consommation' => $devisStation->getConsommation(),
+            'prixUnite' => $devisStation->getPrixUnite(),
+            'budgetObtenu' => $devisStation->getBudgetObtenu(),
+            'dateAddDevis' => $devisStation->getDateAddDevis()->format('Y-m-d H:i:s'),
+            'utilisateur' => [
+                'id' => $devisStation->getUtilisateur()->getId(),
+                'nomUtilisateur' => $devisStation->getUtilisateur()->getNomUtilisateur(),
+                'prenomUtilisateur' => $devisStation->getUtilisateur()->getPrenomUtilisateur(),
+                'emailUtilisateur' => $devisStation->getUtilisateur()->getEmailUtilisateur(),
+                'motDePasse' => $devisStation->getUtilisateur()->getMotDePasse(),
+                'photoUrl' => $devisStation->getUtilisateur()->getPhotoUrl(),
+            ]
+        ], Response::HTTP_OK);
+    }
+
+}
+
+
+/*#[Route('/list/devis', name: 'list_devis', methods: ['GET'])]
     public  function listDevis(): JsonResponse
     {
         $devisStations = $this->entityManager->getRepository(DevisStation::class)->findAll();
@@ -157,4 +231,3 @@ class DevisController extends AbstractController
         }
         return new JsonResponse($dataDevis, 200);
     }*/
-}
