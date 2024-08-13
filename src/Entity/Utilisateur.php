@@ -6,10 +6,12 @@ use App\Repository\UtilisateurRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
+use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: UtilisateurRepository::class)]
-class Utilisateur
+class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
@@ -108,6 +110,40 @@ class Utilisateur
         $this->motDePasse = $motDePasse;
 
         return $this;
+    }
+
+    public function getUserIdentifier(): string
+    {
+        return $this->emailUtilisateur; // Utilisez l'email comme identifiant unique
+    }
+
+    public function getPassword(): ?string
+    {
+        return $this->motDePasse;
+    }
+
+    public function getRoles(): array
+    {
+        // Pour l'exemple, renvoyer un rôle par défaut
+        return ['ROLE_USER'];
+    }
+
+    public function getSalt(): ?string
+    {
+        // Vous n'avez probablement pas besoin d'un "salt" si vous utilisez bcrypt ou sodium
+        return null;
+    }
+
+    public function eraseCredentials(): void
+    {
+        // Effacez ici les données sensibles si nécessaire
+        // *$this->plainPassword = null;
+    }
+
+    // Ajoutez la méthode getUsername si nécessaire pour rétrocompatibilité
+    public function getUsername(): string
+    {
+        return $this->getUserIdentifier();
     }
 
     /**

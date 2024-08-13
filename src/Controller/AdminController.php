@@ -116,6 +116,7 @@ class AdminController extends AbstractController
                 'nomAdmin' => $admin->getNomAdmin(),
                 'prenomAdmin' => $admin->getPrenomAdmin(),
                 'emailAdmin' => $admin->getEmailAdmin(),
+                'motDePasse' => $admin->getMotDePasse(),
                 // Ne pas inclure le mot de passe dans la réponse
             ]
         ], 200);

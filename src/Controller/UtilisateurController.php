@@ -18,6 +18,9 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
+use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
+use Symfony\Component\Security\Core\User\UserInterface;
+
 
 class UtilisateurController extends AbstractController
 {
@@ -285,19 +288,13 @@ class UtilisateurController extends AbstractController
 
         return new JsonResponse(['error' => 'Aucune photo de profil à supprimer'], 400);
     }
-
-    #[Route('/change_password', name: 'changer_password_user', methods: ['POST'])]
-    public function changePassword(Request $request): JsonResponse
+    // CHANGER LE MOT DE PASSE
+    #[Route('/change_password/{idUser}', name: 'changer_password_user', methods: ['POST'])]
+    public function changePassword(int $idUser, Request $request): JsonResponse
     {
         $userData = json_decode($request->getContent(), true);
 
-        // Check if the user is authenticated
-        $utilisateur = $this->getUser();
-        if (!$utilisateur) {
-            return new JsonResponse(['message' => 'User not authenticated'], 401);
-        }
-
-        // Validate the request data
+        // Vérification que les champs sont présents dans la requête
         if (!isset($userData['currentPassword']) || !isset($userData['newPassword']) || !isset($userData['confirmPassword'])) {
             return new JsonResponse(['message' => 'Paramètres manquants'], 400);
         }
@@ -306,24 +303,72 @@ class UtilisateurController extends AbstractController
         $newPassword = $userData['newPassword'];
         $confirmPassword = $userData['confirmPassword'];
 
-        // Check if the new password matches the confirmation
+        // Recherche de l'utilisateur par son ID
+        $utilisateur = $this->utilisateurRepository->find($idUser);
+
+        if (!$utilisateur) {
+            return new JsonResponse(['message' => 'Utilisateur non trouvé'], 404);
+        }
+
+        // Vérification que le mot de passe actuel est correct
+        if ($utilisateur->getMotDePasse() !== $currentPassword) {
+            return new JsonResponse(['message' => 'Mot de passe actuel incorrect'], 401);
+        }
+
+        // Vérification que le nouveau mot de passe et sa confirmation correspondent
         if ($newPassword !== $confirmPassword) {
-            return new JsonResponse(['message' => 'New password and confirmation do not match'], 400);
+            return new JsonResponse(['message' => 'Le nouveau mot de passe et la confirmation ne correspondent pas'], 400);
         }
 
-        // Verify the current password
-        if (!$this->passwordEncoder->isPasswordValid($utilisateur, $currentPassword)) {
-            return new JsonResponse(['message' => 'Current password is incorrect'], 401);
-        }
+        // Mise à jour du mot de passe
+        $utilisateur->setMotDePasse($newPassword);
 
-        // Encode and set the new password
-        $utilisateur->setPassword($this->passwordEncoder->encodePassword($utilisateur, $newPassword));
-        $this->utilisateurRepository->save($utilisateur);
+        // Enregistrement des modifications
+        $this->entityManager->flush();
 
-        return new JsonResponse(['message' => 'Password changed successfully'], 200);
+        return new JsonResponse(['message' => 'Mot de passe modifié avec succès'], 200);
     }
 
+    #[Route('/check_email/{emailUtilisateur}', name: 'check_email', methods: ['GET'])]
+    public function checkEmail($emailUtilisateur, utilisateurRepository $utilisateurRepository): JsonResponse
+    {
+        if (empty($emailUtilisateur)) {
+            return new JsonResponse(['error' => 'Un e-mail est requis'], 400);
+        }
 
+        $user = $utilisateurRepository->findOneBy(['emailUtilisateur' => $emailUtilisateur]);
+
+        if ($user) {
+            return new JsonResponse(['exists' => true]);
+        }
+
+        return new JsonResponse(['exists' => false], 404);
+    }
+
+    #[Route('/reset_password/{emailUtilisateur}', name: 'reset_password_off_ligne_user', methods: ['POST'])]
+    public function resetPassword($emailUtilisateur, Request $request, EntityManagerInterface $entityManager): JsonResponse
+    {
+        $data = json_decode($request->getContent(), true);
+        $newPassword = $data['newPassword'] ?? null;
+
+        if (!$newPassword) {
+            return new JsonResponse(['error' => "Un nouveau mot de passe est requis"], 400);
+        }
+
+        $user = $entityManager->getRepository(Utilisateur::class)->findOneBy(['emailUtilisateur' => $emailUtilisateur]);
+
+        if (!$user) {
+            return new JsonResponse(['error' => "E-mail d'utilisateur invalide"], 404);
+        }
+
+        // Stocker le mot de passe en clair (NON RECOMMANDÉ POUR LA PRODUCTION)
+        $user->setMotDePasse($newPassword);
+
+        // Sauvegarder le changement dans la base de données
+        $entityManager->flush();
+
+        return new JsonResponse(['message' => 'Le mot de passe a été réinitialisé avec succès']);
+    }
 }
 
 
