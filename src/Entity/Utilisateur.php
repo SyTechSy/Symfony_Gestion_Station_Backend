@@ -53,10 +53,17 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\OneToMany(targetEntity: Bons::class, mappedBy: 'utilisateur')]
     private Collection $bons;
 
+    /**
+     * @var Collection<int, BudgetSommeTotal>
+     */
+    #[ORM\OneToMany(targetEntity: BudgetSommeTotal::class, mappedBy: 'utilisateur')]
+    private Collection $budgetSommeTotals;
+
     public function __construct()
     {
         $this->devisStations = new ArrayCollection();
         $this->bons = new ArrayCollection();
+        $this->budgetSommeTotals = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -242,6 +249,36 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
             // set the owning side to null (unless already changed)
             if ($bon->getUtilisateur() === $this) {
                 $bon->setUtilisateur(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, BudgetSommeTotal>
+     */
+    public function getBudgetSommeTotals(): Collection
+    {
+        return $this->budgetSommeTotals;
+    }
+
+    public function addBudgetSommeTotal(BudgetSommeTotal $budgetSommeTotal): static
+    {
+        if (!$this->budgetSommeTotals->contains($budgetSommeTotal)) {
+            $this->budgetSommeTotals->add($budgetSommeTotal);
+            $budgetSommeTotal->setUtilisateur($this);
+        }
+
+        return $this;
+    }
+
+    public function removeBudgetSommeTotal(BudgetSommeTotal $budgetSommeTotal): static
+    {
+        if ($this->budgetSommeTotals->removeElement($budgetSommeTotal)) {
+            // set the owning side to null (unless already changed)
+            if ($budgetSommeTotal->getUtilisateur() === $this) {
+                $budgetSommeTotal->setUtilisateur(null);
             }
         }
 

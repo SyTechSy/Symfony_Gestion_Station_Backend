@@ -154,9 +154,6 @@ class UtilisateurController extends AbstractController
         if (isset($userData['emailUtilisateur'])) {
             $utilisateur->setEmailUtilisateur($userData['emailUtilisateur']);
         }
-        if (isset($userData['motDePasse'])) {
-            $utilisateur->setMotDePasse($userData['motDePasse']);
-        }
 
         $this->entityManager->flush();
 
