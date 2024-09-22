@@ -39,7 +39,7 @@ class BonsController extends AbstractController
     {
         $dataBon = json_decode($request->getContent(), true);
 
-        $nomDestinataire = $dataBon["nomDestinataire"] ?? '';
+        //$nomDestinataire = $dataBon["nomDestinataire"] ?? '';
         $prixDemander = $dataBon["prixDemander"] ?? '';
         $motif = $dataBon["motif"] ?? '';
         $idUser = $dataBon['utilisateur']['id'];
@@ -50,7 +50,7 @@ class BonsController extends AbstractController
         }
 
         $bons = new Bons();
-        $bons->setNomDestinataire($nomDestinataire);
+        //$bons->setNomDestinataire($nomDestinataire);
         $bons->setPrixDemander($prixDemander);
         $bons->setMotif($motif);
         $bons->setDateAddBon(new \DateTime());
@@ -71,7 +71,7 @@ class BonsController extends AbstractController
 
         return new JsonResponse([
             'idBon' => $bons->getId(),
-            'nomDestinataire' => $bons->getNomDestinataire(),
+            //'nomDestinataire' => $bons->getNomDestinataire(),
             'prixDemander' => $bons->getPrixDemander(),
             'motif' => $bons->getMotif(),
             'dateAddBon' => $bons->getDateAddBon(),
@@ -119,7 +119,7 @@ class BonsController extends AbstractController
             //$formattedDate = $formatter->format($bon->getDateAddBon());
                 array_unshift($dataBon, [
                 'idBon' => $bon->getId(),
-                'nomDestinataire' => $bon->getNomDestinataire(),
+                //'nomDestinataire' => $bon->getNomDestinataire(),
                 'prixDemander' => $bon->getPrixDemander(),
                 'motif' => $bon->getMotif(),
                 'dateAddBon' => $bon->getDateAddBon(),

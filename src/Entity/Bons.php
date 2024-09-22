@@ -15,10 +15,6 @@ class Bons
     #[ORM\Column]
     private ?int $idBon = null;
 
-    #[ORM\Column(length: 255, nullable: false)]
-    #[Assert\NotBlank(message: "Le champs 'nom destinataire' ne doit pas être vide'")]
-    private ?string $nomDestinataire = null;
-
     #[ORM\Column(length: 255)]
     #[Assert\NotBlank(message: "Le champ 'prix demander' ne doit pas être vide.")]
     private ?string $prixDemander = null;
@@ -37,7 +33,7 @@ class Bons
         return $this->idBon;
     }
 
-    public function getNomDestinataire(): ?string
+    /*public function getNomDestinataire(): ?string
     {
         return $this->nomDestinataire;
     }
@@ -47,7 +43,7 @@ class Bons
         $this->nomDestinataire = $nomDestinataire;
 
         return $this;
-    }
+    }*/
 
     public function getPrixDemander(): ?string
     {

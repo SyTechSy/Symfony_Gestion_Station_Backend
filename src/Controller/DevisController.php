@@ -88,7 +88,7 @@ class DevisController extends AbstractController
 
     }
     #[Route('/list/devis/{id}', name: 'list_devis', methods: ['GET'])]
-    public function listDevis(int $id): JsonResponse
+    public function listDevis(int $id): JsonResponse 
     {
         // Vérifier si l'utilisateur existe
         $utilisateur = $this->entityManager->getRepository(Utilisateur::class)->find($id);
