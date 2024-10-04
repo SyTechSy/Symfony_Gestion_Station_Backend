@@ -59,11 +59,18 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\OneToMany(targetEntity: BudgetSommeTotal::class, mappedBy: 'utilisateur')]
     private Collection $budgetSommeTotals;
 
+    /**
+     * @var Collection<int, BonDuJour>
+     */
+    #[ORM\OneToMany(targetEntity: BonDuJour::class, mappedBy: 'utilisateur')]
+    private Collection $bonDuJours;
+
     public function __construct()
     {
         $this->devisStations = new ArrayCollection();
         $this->bons = new ArrayCollection();
         $this->budgetSommeTotals = new ArrayCollection();
+        $this->bonDuJours = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -279,6 +286,36 @@ class Utilisateur implements UserInterface, PasswordAuthenticatedUserInterface
             // set the owning side to null (unless already changed)
             if ($budgetSommeTotal->getUtilisateur() === $this) {
                 $budgetSommeTotal->setUtilisateur(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, BonDuJour>
+     */
+    public function getBonDuJours(): Collection
+    {
+        return $this->bonDuJours;
+    }
+
+    public function addBonDuJour(BonDuJour $bonDuJour): static
+    {
+        if (!$this->bonDuJours->contains($bonDuJour)) {
+            $this->bonDuJours->add($bonDuJour);
+            $bonDuJour->setUtilisateur($this);
+        }
+
+        return $this;
+    }
+
+    public function removeBonDuJour(BonDuJour $bonDuJour): static
+    {
+        if ($this->bonDuJours->removeElement($bonDuJour)) {
+            // set the owning side to null (unless already changed)
+            if ($bonDuJour->getUtilisateur() === $this) {
+                $bonDuJour->setUtilisateur(null);
             }
         }
 
